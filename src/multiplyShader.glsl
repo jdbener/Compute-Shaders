@@ -6,9 +6,9 @@
 // gl_LocalInvocationID is the local index within the work group, and
 // gl_WorkGroupID is the work group's index
 layout (local_size_x = 32) in;
-layout(std430, binding = 7) buffer bufferLayout
+layout(std430, binding = 1) buffer bufferLayout
 { uint data[]; };
 
 void main() {
-	data[gl_GlobalInvocationID.x] = data[gl_GlobalInvocationID.x] * 2;
+	data[gl_GlobalInvocationID.x] = data[gl_GlobalInvocationID.x] * 3;
 }

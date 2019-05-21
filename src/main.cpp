@@ -4,7 +4,6 @@
 #include "ComputeShader.h"
 
 #include <iomanip>
-#include <vector>
 
 using namespace std;
 
@@ -20,7 +19,9 @@ int main(){
 	initOpenGL();
 	cout << "Initaliztion Sucessful!" << endl;
 
-	ifstream shaderFile("src/shader.glsl");
+	// Create a connection to the shader file
+	ifstream multiplyFile("src/multiplyShader.glsl");
+	ifstream reverseFile("src/reverseShader.glsl");
 
 	// Initalize the data we will pass to the GPU
 	vector<unsigned int> data;
@@ -28,9 +29,20 @@ int main(){
 		data.push_back(i);
 
 	{
-		ComputeShader multiply(shaderFile, data.size() * sizeof(data[0]), &data[0]);
-		multiply.dispatch(1024);
-		multiply.pull(&data[0]);
+		// Create Buffers
+		ComputeBuffer inBuffer(1, data);
+		ComputeBuffer outBuffer(2, data.size() * sizeof(data[0]));
+
+		// Multiply our data
+		ComputeShader multiply(multiplyFile);
+		multiply.dispatch(1024 / 32);
+
+		// Reverse our data
+		ComputeShader reverse(reverseFile);
+		reverse.dispatch(1024 / 32);
+
+		// Pull the data from the outbuffer
+		outBuffer.getData(data);
 	}
 
 	// Print out the data
@@ -43,6 +55,8 @@ int main(){
 	cout << endl;
 
 	glfwTerminate();
+	multiplyFile.close();
+	reverseFile.close();
 	cout << endl << "Terminatation Sucessful!" << endl;
 	return 0;
 }

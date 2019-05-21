@@ -1,48 +1,37 @@
 #ifndef COMPUTESHADER_H
 #define COMPUTESHADER_H
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "ComputeBuffer.h"
 
-#include <iostream>
-#include <fstream>
-#include <cstring>
-
-using namespace std;
-
-// Macro which creates an exception structure
-#define error(_name_, _message_) \
-	struct _name_ { _name_(string file, int line) { \
-	cerr << file << " line #" << line << " error: " << _message_ << endl; }};
+#include <map>
 
 error(ProgramCreationError, "Creating Program!")
-error(BufferCreationError, "Invalid Buffer Size!")
 error(WorkGroupCountError, "Dimension greater than maximum!")
-typedef unsigned int byte;
 
 class ComputeShader {
 private:
-	unsigned int programID, // Variable storing the ID of the compiled GLSL program
-		bufferID,			// Variable storing the ID of the storage buffer
-		bufferSize;			// Variable storing the size (in bytes) of the storage buffer
-
+	unsigned int programID; // Variable storing the ID of the compiled GLSL program
+	//map<unsigned int, ComputeBuffer*> buffers;
 public:
-	ComputeShader(const string& src, byte _bufferSize, void* data = nullptr)
-		: bufferSize(_bufferSize) {
-		construct(src, data);
+	ComputeShader(const string& src) {
+		// Create the program
+		programID = createProgram(src.c_str());
+		// If the shader failed to be compiled/linked... error
+		if(!programID) throw ProgramCreationError(__FILE__, __LINE__);
 	}
 
-	ComputeShader(ifstream& shaderFile, byte _bufferSize, void* data = nullptr)
-		: bufferSize(_bufferSize) {
+	ComputeShader(ifstream& shaderFile){
 		const char END_OF_FILE = 26;
 
 		string src;
 		getline(shaderFile, src, END_OF_FILE);
-		construct(src, data);
+		// Create the program
+		programID = createProgram(src.c_str());
+		// If the shader failed to be compiled/linked... error
+		if(!programID) throw ProgramCreationError(__FILE__, __LINE__);
 	}
 
 	~ComputeShader(){
 		glDeleteProgram(programID);
-		glDeleteBuffers(1, &bufferID);
 	}
 
 	void dispatch(unsigned int x, unsigned int y = 1, unsigned int z = 1){
@@ -50,45 +39,43 @@ public:
 		glDispatchCompute(x, y, z);
 	}
 
-	void pull(void* data, byte min = 0, byte max = 0){
-		if(max < 1) max = bufferSize;
-		// Copy the storage buffer into our data buffer
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferID);
-		void* p = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, min, max, GL_MAP_READ_BIT);
-		memcpy(data, p, bufferSize);
-		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+	/*void addBuffer(ComputeBuffer& buffer){
+		buffers[buffer.getBindingPoint()] = &buffer;
 	}
 
-	void push(void* data, unsigned int min = 0, byte max = 0){
-		if(max < 1) max = bufferSize;
-		// Copy the data buffer into our storage buffer
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferID);
-		void* p = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, min, max, GL_MAP_WRITE_BIT);
-		memcpy(p, data, max - min);
-		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+	void removeBuffer(unsigned int bindingPoint, bool release = true){
+		if(release)
+			buffers[bindingPoint]->release();
+		buffers.erase(bindingPoint);
 	}
+
+	ComputeBuffer* getBuffer(unsigned int bindingPoint){
+		return buffers[bindingPoint];
+	}
+
+	void* getNativePointer(unsigned int bindingPoint, unsigned int accessbits = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT, bytes start = 0, bytes finish = 0){
+		return getBuffer(bindingPoint)->getNativePointer(accessbits, start, finish);
+	}
+
+	void getData(unsigned int bindingPoint, void* dataStorage, bytes start = 0, bytes finish = 0){
+		getBuffer(bindingPoint)->getData(dataStorage, start, finish);
+	}
+
+	template <class T>
+	void getData(unsigned int bindingPoint, vector<T>& dataStorage, bytes start = 0, bytes finish = 0){
+		getBuffer(bindingPoint)->getData(dataStorage, start, finish);
+	}
+
+	void setData(unsigned int bindingPoint, void* data, bytes start = 0, bytes finish = 0){
+		getBuffer(bindingPoint)->setData(data, start, finish);
+	}
+
+	template <class T>
+	void setData(unsigned int bindingPoint, vector<T>& data, bytes start = 0, bytes finish = 0){
+		getBuffer(bindingPoint)->setData(data, start, finish);
+	}*/
 
 private:
-	void construct(const string& src, void* data){
-		const int BUFFER_BINDING_POINT = 7;
-		// If we got an invalid size for the buffer... error
-		if(!bufferSize) throw BufferCreationError(__FILE__, __LINE__);
-
-		// Create the program
-		programID = createProgram(src.c_str());
-		// If the shader failed to be compiled/linked... error
-		if(!programID) throw ProgramCreationError(__FILE__, __LINE__);
-
-		// Create the storage buffer
-		glGenBuffers(1, &bufferID);
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferID);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, bufferSize, data, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, BUFFER_BINDING_POINT, bufferID);
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
-	}
-
 	// Original code thanks to http://wili.cc/blog/opengl-cs.html
 	unsigned int createProgram(const char* src) {
 		// Creating the compute shader, and the program object containing the shader
