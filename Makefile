@@ -8,8 +8,7 @@ LIBS=/usr/lib/libglfw.so.3.3 /usr/lib/libGLEW.so.2.1.0 -lGL
 _SRC := $(shell find $(DIR) -name '*.cpp')
 SRC := $(subst $(DIR)/,,$(_SRC))
 
-_DEP := $(shell find $(DIR) -name '*.h') $(shell find $(DIR) -name '*.hpp')
-DEP := $(subst $(DIR)/,,$(_DEP))
+DEP := $(shell find $(DIR) -name '*.h') $(shell find $(DIR) -name '*.hpp')
 
 OBJ := $(addprefix $(DIR)/,$(SRC:%.cpp=%.o))
 
