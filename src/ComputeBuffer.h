@@ -1,21 +1,18 @@
+#ifndef COMPUTE_BUFFER_H
+#define COMPUTE_BUFFER_H
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <fstream>
-#include <cstring>
 #include <vector>
+#include <cstring>
+#include <cassert>
 
 using namespace std;
 
 typedef unsigned int bytes;
-
-// Macro which creates an exception structure
-#define error(_name_, _message_) \
-	struct _name_ { _name_(string file, int line) { \
-	cerr << file << " line #" << line << " error: " << _message_ << endl; }};
-
-error(BufferCreationError, "Invalid Buffer Size!")
 
 class ComputeBuffer {
 private:
@@ -33,7 +30,7 @@ public:
 	ComputeBuffer(unsigned int _bindingPoint, vector<T>& data)
 	: bindingPoint(_bindingPoint) {
 		bufferSize = data.size() * sizeof(data[0]);
-		createBuffer(&data[0]);
+		createBuffer(data.data());
 	}
 
 	~ComputeBuffer(){
@@ -64,7 +61,7 @@ public:
 
 	template <class T>
 	void getData(vector<T>& dataStorage, bytes start = 0, bytes finish = 0){
-		getData(&dataStorage[0], start, finish);
+		getData(dataStorage.data(), start, finish);
 	}
 
 	void setData(void* data, bytes start = 0, bytes finish = 0){
@@ -76,7 +73,7 @@ public:
 
 	template <class T>
 	void setData(vector<T>& data, bytes start = 0, bytes finish = 0){
-		setData(&data[0], start, finish);
+		setData(data.data(), start, finish);
 	}
 
 	unsigned int getBindingPoint(){
@@ -86,7 +83,7 @@ public:
 private:
 	void createBuffer(void* data){
 		// If we got an invalid size for the buffer... error
-		if(!bufferSize) throw BufferCreationError(__FILE__, __LINE__);
+		if(!bufferSize) assert(0 && "Error: Invalid buffer size!");
 
 		// Create the storage buffer
 		glGenBuffers(1, &bufferID);
@@ -96,3 +93,5 @@ private:
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 	}
 };
+
+#endif // COMPUTE_BUFFER_H

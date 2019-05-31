@@ -2,21 +2,15 @@
 #define COMPUTESHADER_H
 #include "ComputeBuffer.h"
 
-#include <map>
-
-error(ProgramCreationError, "Creating Program!")
-error(WorkGroupCountError, "Dimension greater than maximum!")
-
 class ComputeShader {
 private:
 	unsigned int programID; // Variable storing the ID of the compiled GLSL program
-	//map<unsigned int, ComputeBuffer*> buffers;
 public:
 	ComputeShader(const string& src) {
 		// Create the program
 		programID = createProgram(src.c_str());
 		// If the shader failed to be compiled/linked... error
-		if(!programID) throw ProgramCreationError(__FILE__, __LINE__);
+		if(!programID) assert(0 && "Error: Creating program!");
 	}
 
 	ComputeShader(ifstream& shaderFile){
@@ -27,7 +21,7 @@ public:
 		// Create the program
 		programID = createProgram(src.c_str());
 		// If the shader failed to be compiled/linked... error
-		if(!programID) throw ProgramCreationError(__FILE__, __LINE__);
+		if(!programID) assert(0 && "Error: Creating program!");
 	}
 
 	~ComputeShader(){
@@ -38,42 +32,6 @@ public:
 		glUseProgram(programID);
 		glDispatchCompute(x, y, z);
 	}
-
-	/*void addBuffer(ComputeBuffer& buffer){
-		buffers[buffer.getBindingPoint()] = &buffer;
-	}
-
-	void removeBuffer(unsigned int bindingPoint, bool release = true){
-		if(release)
-			buffers[bindingPoint]->release();
-		buffers.erase(bindingPoint);
-	}
-
-	ComputeBuffer* getBuffer(unsigned int bindingPoint){
-		return buffers[bindingPoint];
-	}
-
-	void* getNativePointer(unsigned int bindingPoint, unsigned int accessbits = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT, bytes start = 0, bytes finish = 0){
-		return getBuffer(bindingPoint)->getNativePointer(accessbits, start, finish);
-	}
-
-	void getData(unsigned int bindingPoint, void* dataStorage, bytes start = 0, bytes finish = 0){
-		getBuffer(bindingPoint)->getData(dataStorage, start, finish);
-	}
-
-	template <class T>
-	void getData(unsigned int bindingPoint, vector<T>& dataStorage, bytes start = 0, bytes finish = 0){
-		getBuffer(bindingPoint)->getData(dataStorage, start, finish);
-	}
-
-	void setData(unsigned int bindingPoint, void* data, bytes start = 0, bytes finish = 0){
-		getBuffer(bindingPoint)->setData(data, start, finish);
-	}
-
-	template <class T>
-	void setData(unsigned int bindingPoint, vector<T>& data, bytes start = 0, bytes finish = 0){
-		getBuffer(bindingPoint)->setData(data, start, finish);
-	}*/
 
 private:
 	// Original code thanks to http://wili.cc/blog/opengl-cs.html

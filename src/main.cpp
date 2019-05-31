@@ -2,15 +2,11 @@
 	Thanks https://www.youtube.com/watch?v=W3gAzLwfIP0&list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2
 */
 #include "ComputeShader.h"
+#include "StructuredBuffer.h"
 
 #include <iomanip>
 
 using namespace std;
-
-error(LibraryInitalizationError, "Intializing GLFW!")
-error(CreatingWindowError, "Creating Window!")
-error(LoadingOpenGLError, "Loading OpenGL!")
-error(ExtensionNotFoundError, "Extension \"GL_ARB_compute_shader\" not found")
 
 GLFWwindow* initOpenGL();
 
@@ -31,7 +27,10 @@ int main(){
 	{
 		// Create Buffers
 		ComputeBuffer inBuffer(1, data);
-		ComputeBuffer outBuffer(2, data.size() * sizeof(data[0]));
+		//ComputeBuffer outBuffer(2, data.size() * sizeof(data[0]));
+		StructuredBuffer outBuffer(2);
+		outBuffer.addField<int>(data.size());
+		outBuffer.commit();
 
 		// Multiply our data
 		ComputeShader multiply(multiplyFile);
@@ -76,16 +75,14 @@ void checkExtension(){
 		}
 
 	// Error computer shaders are not supported
-	if (!found)
-		throw ExtensionNotFoundError(__FILE__, __LINE__);
+	if (!found) assert(0 && "Extension \"GL_ARB_compute_shader\" not found");
 }
 
 GLFWwindow* initOpenGL(){
 	GLFWwindow* window;
 
 	// Initialize the library
-	if (!glfwInit())
-		throw LibraryInitalizationError(__FILE__, __LINE__);
+	if (!glfwInit()) assert(0 && "Error: Intializing GLFW!");
 
 	// Create a windowed mode window and its OpenGL context
 	const double WIDTH = 960, HEIGHT = 540;
@@ -93,7 +90,7 @@ GLFWwindow* initOpenGL(){
 	if (!window)
 	{
 		glfwTerminate();
-		throw CreatingWindowError(__FILE__, __LINE__);
+		assert(0 && "Error: Creating Window!");
 	}
 
 	// Make the window's context current
@@ -103,8 +100,7 @@ GLFWwindow* initOpenGL(){
 	glfwSwapInterval(1);
 
 	// Load in the modern OpenGL functions
-	if (glewInit() != GLEW_OK)
-		throw LoadingOpenGLError(__FILE__, __LINE__);
+	if (glewInit() != GLEW_OK) assert(0 && "Error: Loading OpenGL!");
 
 	// Ensure that compute shaders are supported
 	checkExtension();
