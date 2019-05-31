@@ -2,7 +2,7 @@
 	Thanks https://www.youtube.com/watch?v=W3gAzLwfIP0&list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2
 */
 #include "ComputeShader.h"
-#include "StructuredBuffer.h"
+#include "ComputeBuffer.h"
 
 #include <iomanip>
 
@@ -28,7 +28,7 @@ int main(){
 		// Create Buffers
 		ComputeBuffer inBuffer(1, data);
 		//ComputeBuffer outBuffer(2, data.size() * sizeof(data[0]));
-		StructuredBuffer outBuffer(2);
+		ComputeBuffer outBuffer(2);
 		outBuffer.addField<int>(data.size());
 		outBuffer.commit();
 
