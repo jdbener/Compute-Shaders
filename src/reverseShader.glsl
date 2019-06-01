@@ -12,6 +12,11 @@ layout(std430, binding = 1) buffer inBuffer
 layout(std430, binding = 2) buffer outBuffer
 { uint outData[]; };
 
+uniform bool shouldFlip;
+
 void main() {
-	outData[gl_GlobalInvocationID.x] = inData[1023 - gl_GlobalInvocationID.x];
+	if(shouldFlip)
+		outData[gl_GlobalInvocationID.x] = inData[1023 - gl_GlobalInvocationID.x];
+	else
+		outData[gl_GlobalInvocationID.x] = inData[gl_GlobalInvocationID.x]; 
 }

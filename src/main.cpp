@@ -38,10 +38,13 @@ int main(){
 
 		// Reverse our data
 		ComputeShader reverse(reverseFile);
+		reverse.setParameter("shouldFlip", false);
 		reverse.dispatch(1024 / 32);
 
 		// Pull the data from the outbuffer
 		outBuffer.getData(data);
+
+		cout << (reverse.getParameter<bool>("shouldFlip") ? "true" : "false") << endl;
 	}
 
 	// Print out the data
