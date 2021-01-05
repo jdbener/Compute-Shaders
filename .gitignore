@@ -1,2 +1,5 @@
 *.o
-Run
+*.gch
+*.kdev4
+.sconsign.dblite
+run

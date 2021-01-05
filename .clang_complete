@@ -1,1 +1,3 @@
+-std=c++14
 -I/usr/include
+-Isrc/OpenGL

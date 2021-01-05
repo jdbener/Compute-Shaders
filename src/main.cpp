@@ -1,8 +1,8 @@
 /*
 	Thanks https://www.youtube.com/watch?v=W3gAzLwfIP0&list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2
 */
-#include "ComputeShader.h"
-#include "ComputeBuffer.h"
+#include "ComputeShader.hpp"
+#include "ComputeBuffer.hpp"
 
 #include <iomanip>
 
@@ -27,8 +27,9 @@ int main(){
 	{
 		// Create Buffers
 		ComputeBuffer inBuffer(1, data);
+
 		//ComputeBuffer outBuffer(2, data.size() * sizeof(data[0]));
-		ComputeBuffer outBuffer(2);
+		StructuredComputeBuffer outBuffer(2);
 		outBuffer.addField<int>(data.size());
 		outBuffer.commit();
 
@@ -47,7 +48,7 @@ int main(){
 		cout << (reverse.getParameter<bool>("shouldFlip") ? "true" : "false") << endl;
 	}
 
-	// Print out the data
+	// Print out the start of the data
 	cout << endl << "Data:";
 	for(int i = 0; i < 30; i++){
 		if(i % 10 == 0)	cout << endl;
@@ -63,7 +64,7 @@ int main(){
 	return 0;
 }
 
-void checkExtension(){
+void glCheckExtension(){
 	// Determine the number of extensions
 	int count;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &count);
@@ -106,7 +107,7 @@ GLFWwindow* initOpenGL(){
 	if (glewInit() != GLEW_OK) assert(0 && "Error: Loading OpenGL!");
 
 	// Ensure that compute shaders are supported
-	checkExtension();
+	glCheckExtension();
 
 	return window;
 }
