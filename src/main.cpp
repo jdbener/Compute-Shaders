@@ -1,16 +1,32 @@
 /*
 	Thanks https://www.youtube.com/watch?v=W3gAzLwfIP0&list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2
 */
-#include "ComputeShader.hpp"
-#include "ComputeBuffer.hpp"
+#include "OpenGL/BoilerPlate.hpp"
+#include "OpenGL/DictionaryComputeBuffer.hpp"
+
+#include "timer.h"
 
 #include <iomanip>
 
 using namespace std;
 
-GLFWwindow* initOpenGL();
-
 int main(){
+	Dictionary d;
+	d["bob"] = 21.0;
+	d["england"] = {"c", "i", "t", "y"};
+	d["paul"] = "is my";
+
+	std::cout << (char) d["england"][3][0] << std::endl;
+	std::cout << (int) float(d["bob"]) << std::endl;
+	std::cout << d.has("bob") << " - " << d.has("texas") << std::endl;
+
+
+
+
+
+
+
+
 	// Create the OpenGL Context
 	initOpenGL();
 	cout << "Initaliztion Sucessful!" << endl;
@@ -23,6 +39,22 @@ int main(){
 	vector<unsigned int> data;
 	for(int i = 1; i <= 1024; i++)
 		data.push_back(i);
+
+
+	DictionaryComputeBuffer buf(3);
+	{
+		Timer t;
+		buf.bindDictionary(d);
+	}
+	{
+		Timer t;
+		Dictionary d2 = buf.getData();
+		t.stop();
+		std::cout << (char) d2["england"][3][0] << std::endl;
+		std::cout << (int) float(d2["bob"]) << std::endl;
+	}
+
+
 
 	{
 		// Create Buffers
@@ -62,52 +94,4 @@ int main(){
 	reverseFile.close();
 	cout << endl << "Terminatation Sucessful!" << endl;
 	return 0;
-}
-
-void glCheckExtension(){
-	// Determine the number of extensions
-	int count;
-	glGetIntegerv(GL_NUM_EXTENSIONS, &count);
-
-	// Determine if compute shaders are supported
-	bool found = false;
-	for (int i = 0; i < count; ++i)
-		if (string((char*)glGetStringi(GL_EXTENSIONS, i)).find("GL_ARB_compute_shader") != string::npos) {
-			//cout << "Extension \"GL_ARB_compute_shader\" found" << endl;
-			found = true;
-			break;
-		}
-
-	// Error computer shaders are not supported
-	if (!found) assert(0 && "Extension \"GL_ARB_compute_shader\" not found");
-}
-
-GLFWwindow* initOpenGL(){
-	GLFWwindow* window;
-
-	// Initialize the library
-	if (!glfwInit()) assert(0 && "Error: Intializing GLFW!");
-
-	// Create a windowed mode window and its OpenGL context
-	const double WIDTH = 960, HEIGHT = 540;
-	window = glfwCreateWindow(WIDTH, HEIGHT, "Compute Shader", NULL, NULL);
-	if (!window)
-	{
-		glfwTerminate();
-		assert(0 && "Error: Creating Window!");
-	}
-
-	// Make the window's context current
-	glfwMakeContextCurrent(window);
-
-	// Syncronize frame rate with monitor refresh rate
-	glfwSwapInterval(1);
-
-	// Load in the modern OpenGL functions
-	if (glewInit() != GLEW_OK) assert(0 && "Error: Loading OpenGL!");
-
-	// Ensure that compute shaders are supported
-	glCheckExtension();
-
-	return window;
 }
