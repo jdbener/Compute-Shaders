@@ -17,6 +17,12 @@ sources += glob.glob("**/*.c", recursive=True)
 env.ParseConfig("pkg-config glfw3 --cflags --libs")
 env.ParseConfig("pkg-config glew --cflags --libs")
 
+# Use pkg-config to link against vulkan
+env.ParseConfig("pkg-config vulkan --cflags --libs")
+# Use pkg-config to link against glslang
+env.ParseConfig("pkg-config glslang --cflags --libs")
+env.ParseConfig("pkg-config spirv --cflags --libs")
+
 # Compile
 env.Program(target = "run", source = sources)
 

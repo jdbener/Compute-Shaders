@@ -5,7 +5,7 @@
 // gl_GlobalInvocationID is a uvec3 variable giving the global ID of the thread,
 // gl_LocalInvocationID is the local index within the work group, and
 // gl_WorkGroupID is the work group's index
-layout (local_size_x = 32) in;
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 layout(std430, binding = 1) buffer bufferLayout
 { uint data[]; };
 
